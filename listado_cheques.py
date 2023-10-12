@@ -1,37 +1,5 @@
 import csv
 
-cant_variables = 10
-
-# Creacion de variables para guardar los datos
-NroCheque = []
-CodigoBanco = []
-CodigoScurusal = []
-NumeroCuentaOrigen = []
-NumeroCuentaDestino = []
-Valor = []
-FechaOrigen = []
-FechaPago = []
-DNI = []
-Estado = []
-
-#Guardo de datos en variables
-with open('C:/Full Stack ITBA/Sprint 4/Sprint4-Entrega/archivo.csv', 'r') as archivocsv:
-    lector = csv.reader(archivocsv)
-
-    next(lector)
-
-    for valor in lector:
-        NroCheque.append(valor[0])
-        CodigoBanco.append(valor[1])
-        CodigoScurusal.append(valor[2])
-        NumeroCuentaOrigen.append(valor[3])
-        NumeroCuentaDestino.append(valor[4])
-        Valor.append(valor[5])
-        FechaOrigen.append(valor[6])
-        FechaPago.append(valor[7])
-        DNI.append(valor[8])
-        Estado.append(valor[9])
-
 #Inputs
 dni_ingresado = int(input('Ingrese su DNI:'))
 salida_ingresado = input('Que tipo de salida quiere: [PANTALLA - CSV]: ')
@@ -84,6 +52,37 @@ elif (salida_ingresado == 'CSV'):
             datos = (f" {NroCheque[cant_dni[i]]},{CodigoBanco[cant_dni[i]]},{CodigoScurusal[cant_dni[i]]},{NumeroCuentaOrigen[cant_dni[i]]},{NumeroCuentaDestino[cant_dni[i]]},{Valor[cant_dni[i]]},{FechaOrigen[cant_dni[i]]},{FechaPago[cant_dni[i]]},{DNI[cant_dni[i]]},{Estado[cant_dni[i]]}")
             escritor_csv.writerow(datos)"""
 
-#print(buscarDNI(12345678)) #4
 
+"""
+cant_variables = 10
 
+# Creacion de variables para guardar los datos
+NroCheque = []
+CodigoBanco = []
+CodigoScurusal = []
+NumeroCuentaOrigen = []
+NumeroCuentaDestino = []
+Valor = []
+FechaOrigen = []
+FechaPago = []
+DNI = []
+Estado = []
+
+#Guardo de datos en variables
+with open('C:/Full Stack ITBA/Sprint 4/Sprint4-Entrega/archivo.csv', 'r') as archivocsv:
+    lector = csv.reader(archivocsv)
+
+    next(lector)
+
+    for valor in lector:
+        NroCheque.append(valor[0])
+        CodigoBanco.append(valor[1])
+        CodigoScurusal.append(valor[2])
+        NumeroCuentaOrigen.append(valor[3])
+        NumeroCuentaDestino.append(valor[4])
+        Valor.append(valor[5])
+        FechaOrigen.append(valor[6])
+        FechaPago.append(valor[7])
+        DNI.append(valor[8])
+        Estado.append(valor[9])
+"""

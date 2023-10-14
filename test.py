@@ -1,20 +1,24 @@
-import csv
+import argparse
 
-def buscar_cheques(archivo_csv, dni, estado=None, rango_desde=None, rango_hasta=None):
-    resultados = []
+# Crear un objeto ArgumentParser
+parser = argparse.ArgumentParser(description="Un ejemplo de cómo pasar parámetros por línea de comandos en Python")
 
-    with open(archivo_csv, newline='') as archivo:
-        lector_csv = csv.DictReader(archivo)
-        for fila in lector_csv:
-            if int(fila["DNI"]) == int(dni):
-                if estado is None or fila["Estado"] == estado:
-                    if rango_desde is None or rango_hasta is None:
-                        resultados.append(fila)
-                    else:
-                        fecha_pago = int(fila["FechaPago"])
-                        if rango_desde <= fecha_pago <= rango_hasta:
-                            resultados.append(fila)
+# Agregar un argumento obligatorio
+parser.add_argument("parametro_dni", type=int, help="Este es un argumento obligatorio de tipo entero.")
 
-    return resultados
+# Agregar un argumento obligatorio
+parser.add_argument("parametro_pantalla", type=str, help="Este es un argumento obligatorio de tipo entero 2.")
 
-print(buscar_cheques("C:/Full Stack ITBA/Sprint 4/Sprint4-Entrega/archivo.csv",12345678))
+# Agregar un argumento opcional
+parser.add_argument("--parametro_opcional", type=str, help="Este es un argumento opcional de tipo cadena.")
+
+# Analizar los argumentos de la línea de comandos
+args = parser.parse_args()
+
+# Acceder a los argumentos
+print("Argumento Obligatorio:", args.parametro_dni)
+# Acceder a los argumentos
+print("Argumento Obligatorio:", args.parametro_pantalla)
+
+if args.parametro_opcional:
+    print("Argumento Opcional:", args.parametro_opcional)

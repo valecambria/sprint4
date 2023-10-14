@@ -20,7 +20,6 @@ parser.add_argument("parametro_tipo_cheque", type=str, help="Argumento obligator
 # Argumentos opcionales: estado y fecha
 parser.add_argument("--estado", type=str, help="Argumento opcional con el estado del cheque(PENDIENTE, APROBADO, RECHAZADO)")
 
-# Agregar un argumento opcional
 parser.add_argument("--fecha", type=str, help="Argumento opcional con la fecha a partir de la cual mostrar los cheques.")
 
 # Analizar los argumentos de la línea de comandos
@@ -31,7 +30,7 @@ args = parser.parse_args()
 #----------------------------------- Funcion filtrador  ------------------------------------------------
 
 #Filtrador (corte de control segun los filtros indicados)
-def buscar_cheques(archivo_csv, dni, estado, rango_desde, rango_hasta):
+def buscar_cheques(archivo_csv, dni, estado, rango):
     resultados = [] #Se guardan los resultados en una lista
 
     with open(archivo_csv, newline='') as archivo: #Apertura del archivo
@@ -42,18 +41,18 @@ def buscar_cheques(archivo_csv, dni, estado, rango_desde, rango_hasta):
                 #Luego por el estado del cheque
                 if estado is None or fila["Estado"].upper() == estado.upper():
                     #Por ultimo, el rango de fechas
-                    if rango_desde is None or rango_hasta is None:
+                    if rango is None:
                         resultados.append(fila)
                     else:
-                        fecha_pago = int(fila["FechaPago"])
+                        fecha_pago = fila["FechaPago"]
                         #Si esta entre ese rango lo guardo, las fechas estan en timestap
-                        if rango_desde <= fecha_pago <= rango_hasta:
+                        if rango >= fecha_pago:
                             resultados.append(fila)
 
     return resultados
 
 #Aplico el filtrado a los datos de entrada
-filtrados = buscar_cheques("C:/Full Stack ITBA/Sprint 4/Sprint4-Entrega/" + args.parametro_archivoCSV,args.parametro_dni,args.estado,None,None)
+filtrados = buscar_cheques("C:/Full Stack ITBA/Sprint 4/Sprint4-Entrega/" + args.parametro_archivoCSV,args.parametro_dni,args.estado,args.fecha)
 
 #------------------------------------------------------------------------------------
 
@@ -73,7 +72,10 @@ if (args.parametro_pantalla == 'PANTALLA'):
 elif (args.parametro_pantalla == 'CSV'):
     # Fecha y hora actual
     ahora = datetime.datetime.now()
-    with open("datos.csv", 'w', newline='') as archivonuevo_csv:
+    cadena_fecha = ahora.strftime("%Y-%m-%d") #Pasa la fecha a formato año-mes-dia
+    # Nombre archivo
+    nombre_archivo = args.parametro_dni + "_" + cadena_fecha + '.csv'
+    with open(nombre_archivo, 'w', newline='') as archivonuevo_csv:
         # Crear un escritor de CSV
         escritor_csv = csv.writer(archivonuevo_csv, quoting=csv.QUOTE_NONE, escapechar=' ') #Cambio el delimitador a espacio, sino se guarda con ""
         # Escribir los datos fila por fila
@@ -84,3 +86,9 @@ elif (args.parametro_pantalla == 'CSV'):
             escritor_csv.writerow([datos])
 else:
     print('Salida invalida. Solamente es posible por Pantalla o Archivo CSV')
+
+#Codigos para testear
+
+#python listado_cheques.py cheques.csv 12345678 PANTALLA EMITIDO
+#python listado_cheques.py cheques.csv 98765432 CSV DEPOSITADO --fecha 2021-09-12:2
+#python listado_cheques.py cheques.csv 55555555 PANTALLA EMITIDO --estado RECHAZADO

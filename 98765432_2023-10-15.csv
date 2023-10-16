@@ -1,0 +1,3 @@
+NroCheque ,CodigoBanco ,CodigoScurusal ,NumeroCuentaOrigen ,NumeroCuentaDestino ,Valor ,FechaOrigen ,FechaPago ,DNI ,Estado
+2 ,22 ,203 ,87654321 ,56789012 ,750.25 ,1631152800 ,1631941200 ,98765432 ,pendiente
+6 ,12 ,44 ,33333333 ,98765432 ,500.25 ,1631152800 ,1631941200 ,98765432 ,aprobado

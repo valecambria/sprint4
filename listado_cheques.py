@@ -1,8 +1,6 @@
 import csv
 import argparse
 import datetime
-import time
-
 #----------------------------------- Entrada (inputs) por consola ------------------------------------------------
 
 # Crear un objeto ArgumentParser
@@ -26,23 +24,39 @@ parser.add_argument("--fecha", type=str, help="Argumento opcional con la fecha a
 args = parser.parse_args()
 
 #-----------------------------------------Validacion de parámetros-------------------------------------------
-validacion=True
-if not args.parametro_dni.isnumeric():
-    print("El DNI tiene que ser un numero")
-    validacion=False
-if not (args.parametro_tipo_cheque == 'EMITIDO' or args.parametro_tipo_cheque =='DEPOSITADO'):
-    print("Debe especificar si el cheque fue emitido o depositado")
-    validacion=False
-if args.estado is not None and not (args.estado == 'PENDIENTE' or args.estado == 'APROBADO' or args.estado == 'RECHAZADO'):
-    print("Debe especificar el estado del cheque correctamente (Aprobado, Pendiente o Rechazado)")
-    validacion=False
+
+#Funcion que comprueba que la fecha es valida
 def es_fecha_valida(fecha_str):
     try:
         datetime.strptime(fecha_str, '%Y-%m-%d')  # Ajusta el formato según tus necesidades
         return True
     except (ValueError, AttributeError): 
         return False
-if not es_fecha_valida(args.fecha):
+
+#Funcion que comprueba si hay cheques repetidos para el mismo cliente
+def cheques_repetidos(lista):
+    repite = False
+    for i in range (len(lista)):
+        for j in range (i + 1, len(lista)):
+            if lista[i]['NroCheque'] == lista[j]['NroCheque']:
+                repite = True 
+    return repite
+
+validacion=True #Esta variable permite que se realize la consulta solo si los datos proporcionados con correctos
+#DNI valido
+if not args.parametro_dni.isnumeric():
+    print("El DNI tiene que ser un numero")
+    validacion=False
+#Tipo de cheque valido
+elif not (args.parametro_tipo_cheque == 'EMITIDO' or args.parametro_tipo_cheque =='DEPOSITADO'):
+    print("Debe especificar si el cheque fue emitido o depositado")
+    validacion=False
+#Estado valido
+elif args.estado is not None and not (args.estado == 'PENDIENTE' or args.estado == 'APROBADO' or args.estado == 'RECHAZADO'):
+    print("Debe especificar el estado del cheque correctamente (Aprobado, Pendiente o Rechazado)")
+    validacion=False
+#Fecha valida
+elif args.fecha is not None and not es_fecha_valida(args.fecha):
     print("Ingrese una fecha válida (YY-MM-DD)")
     validacion=False
 
@@ -70,41 +84,46 @@ def buscar_cheques(archivo_csv, dni, estado, rango):
 
     return resultados
 
-#Aplico el filtrado a los datos de entrada
-filtrados = buscar_cheques(args.parametro_archivoCSV,args.parametro_dni,args.estado,args.fecha)
+#Aplico el filtrado a los datos de entrada solo si se cumplen los parametros
+if validacion:
 
-#------------------------------------------------------------------------------------
+    filtrados = buscar_cheques(args.parametro_archivoCSV,args.parametro_dni,args.estado,args.fecha)
 
-#----------------------------------- Salida (Outputs)  ------------------------------------------------
+    #----------------------------------- Salida (Outputs)  ------------------------------------------------
 
-#Salida por pantalla
+    #Salida por pantalla
 
-if (args.parametro_pantalla == 'PANTALLA' and validacion):
-    #Mostrar por pantalla
-    print("NroCheque | CodigoBanco | CodigoScurusal | NumeroCuentaOrigen | NumeroCuentaDestino | Valor | FechaOrigen | FechaPago | DNI | Estado")
-    
-    #Muestro todos los cheques con ese filtro
-    for i in range (len(filtrados)):
-        print(f" {filtrados[i]['NroCheque']} | {filtrados[i]['CodigoBanco']} | {filtrados[i]['CodigoScurusal']} | {filtrados[i]['NumeroCuentaOrigen']}| {filtrados[i]['NumeroCuentaDestino']} | {filtrados[i]['Valor']} | {filtrados[i]['FechaOrigen']} | {filtrados[i]['FechaPago']} | {filtrados[i]['DNI']} | {filtrados[i]['Estado']}")
+    if (args.parametro_pantalla == 'PANTALLA'):
+        #Mostrar por pantalla
+        
+        #En el caso de que existan chequeres
+        if (cheques_repetidos(filtrados)):
+            print('Existen cheques repetidos')
 
-#Salida por archivo
-elif (args.parametro_pantalla == 'CSV' and validacion):
-    # Fecha y hora actual
-    ahora = datetime.datetime.now()
-    cadena_fecha = ahora.strftime("%Y-%m-%d") #Pasa la fecha a formato año-mes-dia
-    # Nombre archivo
-    nombre_archivo = args.parametro_dni + "_" + cadena_fecha + '.csv'
-    with open(nombre_archivo, 'w', newline='') as archivonuevo_csv:
-        # Crear un escritor de CSV
-        escritor_csv = csv.writer(archivonuevo_csv, quoting=csv.QUOTE_NONE, escapechar=' ') #Cambio el delimitador a espacio, sino se guarda con ""
-        # Escribir los datos fila por fila
-        texto =  'NroCheque,CodigoBanco,CodigoScurusal,NumeroCuentaOrigen,NumeroCuentaDestino,Valor,FechaOrigen,FechaPago,DNI,Estado'
-        escritor_csv.writerow([texto])
+        print("NroCheque | CodigoBanco | CodigoScurusal | NumeroCuentaOrigen | NumeroCuentaDestino | Valor | FechaOrigen | FechaPago | DNI | Estado")
+        
+        #Muestro todos los cheques con ese filtro
         for i in range (len(filtrados)):
-            datos = (f"{filtrados[i]['NroCheque']},{filtrados[i]['CodigoBanco']},{filtrados[i]['CodigoScurusal']},{filtrados[i]['NumeroCuentaOrigen']},{filtrados[i]['NumeroCuentaDestino']},{filtrados[i]['Valor']},{filtrados[i]['FechaOrigen']},{filtrados[i]['FechaPago']},{filtrados[i]['DNI']},{filtrados[i]['Estado']}")
-            escritor_csv.writerow([datos])
-elif validacion:
-    print('Salida invalida. Solamente es posible por Pantalla o Archivo CSV')
+            print(f" {filtrados[i]['NroCheque']} | {filtrados[i]['CodigoBanco']} | {filtrados[i]['CodigoScurusal']} | {filtrados[i]['NumeroCuentaOrigen']}| {filtrados[i]['NumeroCuentaDestino']} | {filtrados[i]['Valor']} | {filtrados[i]['FechaOrigen']} | {filtrados[i]['FechaPago']} | {filtrados[i]['DNI']} | {filtrados[i]['Estado']}")
+
+    #Salida por archivo
+    elif (args.parametro_pantalla == 'CSV'):
+        # Fecha y hora actual
+        ahora = datetime.datetime.now()
+        cadena_fecha = ahora.strftime("%Y-%m-%d") #Pasa la fecha a formato año-mes-dia
+        # Nombre archivo
+        nombre_archivo = args.parametro_dni + "_" + cadena_fecha + '.csv'
+        with open(nombre_archivo, 'w', newline='') as archivonuevo_csv:
+            # Crear un escritor de CSV
+            escritor_csv = csv.writer(archivonuevo_csv, quoting=csv.QUOTE_NONE, escapechar=' ') #Cambio el delimitador a espacio, sino se guarda con ""
+            # Escribir los datos fila por fila
+            texto =  'NroCheque,CodigoBanco,CodigoScurusal,NumeroCuentaOrigen,NumeroCuentaDestino,Valor,FechaOrigen,FechaPago,DNI,Estado'
+            escritor_csv.writerow([texto])
+            for i in range (len(filtrados)):
+                datos = (f"{filtrados[i]['NroCheque']},{filtrados[i]['CodigoBanco']},{filtrados[i]['CodigoScurusal']},{filtrados[i]['NumeroCuentaOrigen']},{filtrados[i]['NumeroCuentaDestino']},{filtrados[i]['Valor']},{filtrados[i]['FechaOrigen']},{filtrados[i]['FechaPago']},{filtrados[i]['DNI']},{filtrados[i]['Estado']}")
+                escritor_csv.writerow([datos])
+    else:
+        print('Salida invalida. Solamente es posible por Pantalla o Archivo CSV')
 
 #Codigos para testear
 
